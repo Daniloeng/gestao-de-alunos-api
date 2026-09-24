@@ -86,12 +86,22 @@ npm install
 # subir em modo produção
 npm start
 
+# executar os testes automatizados
+npm test
+
 # subir em modo desenvolvimento (reinício automático com nodemon)
 npm run dev
 ```
 
 O servidor sobe por padrão em `http://localhost:3000` (pode ser alterado com a variável de
 ambiente `PORT`).
+
+As configurações podem ser definidas em um arquivo `.env` na raiz do projeto. Use
+[`.env.example`](.env.example) como referência para `PORT` e `JWT_SECRET`. O arquivo `.env` não é
+versionado.
+
+Os testes também são executados automaticamente em cada `push` e `pull request` pelo workflow do
+GitHub Actions.
 
 ## Documentação da API (Swagger)
 
