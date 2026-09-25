@@ -7,6 +7,8 @@ import { loginAsAdmin, loginAsStudent } from './utils.js';
 const require = createRequire(import.meta.url);
 const testData = require('./data/test-data.json');
 
+let alunoCadastrado = null;
+
 describe('Fluxo de cadastro e entrega do aluno', () => {
   let adminToken;
 
@@ -21,6 +23,10 @@ describe('Fluxo de cadastro e entrega do aluno', () => {
       .send(testData.studentRegistration);
 
     expect(res.status).to.equal(201);
+    alunoCadastrado = {
+      ...res.body,
+      senha: testData.studentRegistration.senha,
+    };
     expect(res.body).to.include({
       nome: testData.studentRegistration.nome,
       email: testData.studentRegistration.email,
@@ -44,6 +50,50 @@ describe('Fluxo de cadastro e entrega do aluno', () => {
       expect(res.status).to.equal(201);
       expect(res.body).to.include({
         alunoId: delivery.alunoId,
+        disciplinaId: delivery.disciplinaId,
+        titulo: delivery.titulo,
+        status: 'entregue',
+      });
+    });
+  }
+});
+
+describe('Fluxo complementar com aluno cadastrado anteriormente', () => {
+  let adminToken;
+
+  before(async () => {
+    adminToken = await loginAsAdmin();
+  });
+
+  for (const delivery of testData.complementaryDelivery) {
+    it(`loga com o aluno cadastrado e registra uma nova entrega de ${delivery.titulo}`, async () => {
+      const aluno = alunoCadastrado ?? testData.student;
+
+      if (alunoCadastrado) {
+        const matriculaRes = await request(app)
+          .post(`/api/admin/disciplinas/${delivery.disciplinaId}/matriculas`)
+          .set('Authorization', `Bearer ${adminToken}`)
+          .send({ alunoId: aluno.id });
+
+        expect(matriculaRes.status).to.equal(201);
+      }
+
+      const studentToken = await loginAsStudent({
+        email: aluno.email,
+        senha: aluno.senha,
+      });
+      const res = await request(app)
+        .post(`/api/alunos/${aluno.id}/trabalhos`)
+        .set('Authorization', `Bearer ${studentToken}`)
+        .send({
+          disciplinaId: delivery.disciplinaId,
+          titulo: delivery.titulo,
+          descricao: delivery.descricao,
+        });
+
+      expect(res.status).to.equal(201);
+      expect(res.body).to.include({
+        alunoId: aluno.id,
         disciplinaId: delivery.disciplinaId,
         titulo: delivery.titulo,
         status: 'entregue',
