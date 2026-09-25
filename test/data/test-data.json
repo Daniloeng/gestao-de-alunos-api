@@ -21,5 +21,12 @@
       "titulo": "Lista de Exercicios 2",
       "descricao": "Resolucao dos exercicios do capitulo 3."
     }
+  ],
+  "complementaryDelivery": [
+    {
+        "disciplinaId": "disciplina-matematica",
+        "titulo": "Lista de Exercicios 3",
+        "descricao": "Resolucao dos exercicios do capitulo 4."
+      }
   ]
 }
